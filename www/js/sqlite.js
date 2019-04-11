@@ -33,7 +33,7 @@ function db_init() {
                 id INTEGER PRIMARY KEY,
                 bill_id INTEGER NOT NULL,
                 date TEXT NOT NULL,
-                status INTEGER NO NULL
+                status TEXT NO NULL
             )
         `, [], db_nullHandler, db_errorHandler);
         
