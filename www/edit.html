@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bills Control</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container-fluid my-3">
+
+    <h1 id="page_title"></h1>
+    <form id="form_edit">
+        <input type="hidden" name="id" type="text" value="">
+        <input type="hidden" name="lastpaidmonth" type="text" value="">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input class="form-control" name="title"  id="title"  type="text" value="" required>
+        </div>
+        <div class="form-group">
+            <label for="day">Day</label>
+            <select class="form-control" name="day" id="day" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="month">Month</label>
+            <select class="form-control" name="month" id="month">
+                <option value=""></option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select> 
+        </div>
+        <div class="form-check">
+            <label for="repeat">
+                <input class="form-check-input" type="checkbox" name="repeat" id="repeat" value="1"> Repeat monthly?
+            </label>
+        </div>
+        <div class="form-check">
+            <label for="paid">
+                <input class="form-check-input" type="checkbox" name="paid" id="paid" value="1"> Paid?
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" name="description" id="description"></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between">
+            <button class="btn btn-secondary" type="button" onClick="backMain()">Back</button>
+            <button class="btn btn-primary" type="button" data-context="update" onClick="updateItem()">Update</button>
+            <button class="btn btn-primary" type="button" data-context="save" onClick="saveItem()">Save</button>
+            <button class="btn btn-danger"  type="button" data-context="update" onClick="deleteItem()">Delete</button>
+        </div>
+    </form>
+    <div id="logview" class="mt-4">
+        <div class="text-center">
+            <button class="btn btn-secondary btn-sm" type="button" onClick="viewLog()">View Log</button>
+        </div>
+    </div>
+</div>
+<script id="logTmpl" type="text/x-jsrender">
+    <div class="mt-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{for rows}}
+                <tr>
+                    <td>{{:date}}</td>
+                    <td>{{:status}}</td>
+                </tr>
+                {{/for}}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="text-right">
+                        <button type="button" class="js-log-clean btn btn-danger" data-id="{{:bill_id}}">Clean Log</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</script>
+
+<script src="cordova.js"></script>
+<script src="js/lib/jquery-3.3.1.min.js"></script>
+<script src="js/lib/bootstrap.bundle.min.js"></script>
+<script src="js/lib/bootbox.min.js"></script>
+<script src="js/lib/urlify.min.js"></script>
+<script src="js/lib/jsrender.min.js"></script>
+<script src="js/misc.js"></script>
+<script src="js/sqlite.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

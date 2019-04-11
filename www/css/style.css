@@ -1,0 +1,12 @@
+TEXTAREA{
+    height: 200px;
+    resize: none;
+}
+
+.fa-check{
+    color: green;
+}
+
+.fa-close{
+    color: red;
+}

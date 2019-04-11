@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget 
+    xmlns="http://www.w3.org/ns/widgets" 
+    xmlns:gap="http://phonegap.com/ns/1.0"
+    id="com.github.dataserver.despesas" 
+    version="1" 
+>
+    <name>Monthly bills checker</name>
+    <description>
+        Monthly bills checker
+    </description>
+    <author email="dataserver@users.noreply.github.com" href="http://dataserver.github.io">
+        dataserver
+    </author>
+    <content src="index.html" />
+    <preference name="phonegap-version" value="cli-6.5.0" />
+    <plugin name="cordova-plugin-whitelist" spec="~1.3.3" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <access origin="*" />
+    <platform name="android" />
+    <plugin name="cordova-sqlite-evcore-extbuild-free" spec="0.9.10" source="npm" />
+    <icon src="icon.png" />
+</widget>
