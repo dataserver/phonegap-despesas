@@ -43,11 +43,11 @@
                 <td><a href="edit.html?id={{:id}}">{{:title}}</a></td>
                 <td>{{:day}} {{:month}}</td>
                 {{if paid_this_month==1}}
-                    <td><span class="js-click-set-unpaid btn btn-light btn-sm" data-id="{{:id}}"><i class="fa fa-check"></i></span></td>
+                    <td><span class="js-click-set-unpaid btn btn-outline-light btn-sm" data-id="{{:id}}"><i class="fa fa-check"></i></span></td>
                 {{else}}
-                    <td><span class="js-click-set-paid btn btn-light btn-sm" data-id="{{:id}}"><i class="fa fa-close"></i></span></td>
+                    <td><span class="js-click-set-paid btn btn-outline-light btn-sm" data-id="{{:id}}"><i class="fa fa-close"></i></span></td>
                 {{/if}}
-                <!-- <td><span class="js-options btn btn-light btn-sm" data-id="{{:id}}">...</span></td> -->
+                <!-- <td><span class="js-options btn btn-outline-light btn-sm" data-id="{{:id}}">...</span></td> -->
             </tr>
             {{/for}}
         </tbody>
