@@ -20,7 +20,7 @@ function db_init() {
         db = window.sqlitePlugin.openDatabase({
             name: dbParams.name,
             location: 'default',
-            // androidDatabaseProvider: 'system'
+            androidDatabaseProvider: 'system'
         });
     }
 
