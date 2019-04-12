@@ -36,6 +36,27 @@ function db_init() {
                 status TEXT NO NULL
             )
         `, [], db_nullHandler, db_errorHandler);
+        // tx.executeSql(`
+        //     CREATE TABLE IF NOT EXISTS events (
+        //         id INTEGER PRIMARY KEY,
+        //         title TEXT NOT NULL,
+        //         normalized TEXT NOT NULL
+        //     )
+        // `, [], db_nullHandler, db_errorHandler);
+        // ID    event_id      repeat_start       repeat_interval    repeat_year    repeat_month    repeat_day    repeat_week    repeat_weekday
+        // tx.executeSql(`
+        //     CREATE TABLE IF NOT EXISTS events_meta (
+        //         id INTEGER PRIMARY KEY,
+        //         event_id INTEGER,
+        //         repeat_start TEXT,
+        //         repeat_interval TEXT,
+        //         repeat_year TEXT,
+        //         repeat_month TEXT,
+        //         repeat_day TEXT,
+        //         repeat_week TEXT,
+        //         repeat_weekeday TEXT
+        //     )
+        // `, [], db_nullHandler, db_errorHandler);
         
     }, db_errorHandler, db_successCallBack);
 }
