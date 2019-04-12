@@ -6,9 +6,9 @@ var displayName = 'BillsSQLite';
 var maxSize = 65535;
 
 function db_init() {
-
+    
     if (!window.openDatabase) {
-        alert('Databases are not supported in this browser.');
+        toastr.error("Database are not supported in this browser.");
         return;
     }
     db = openDatabase(shortName, version, displayName, maxSize);
