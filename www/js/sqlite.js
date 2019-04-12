@@ -1,9 +1,12 @@
 //sqlite
-var db;
-var shortName = 'BillsSQLite';
-var version = '1.0';
-var displayName = 'BillsSQLite';
-var maxSize = 65535;
+var db = null;
+var dbParams = {
+    name : "BillsSQL.db",        // unique name of the database, as it will be stored in disk.
+    version: '1.0',                     // database version
+    displayName : "BillsSQL.db", // A human friendly name for the database, which the system will use if it needs to describe your database to the user
+    estimatedSize :  65535          // in bytes
+
+};
 
 function db_init() {
     
@@ -11,13 +14,22 @@ function db_init() {
         toastr.error("Database are not supported in this browser.");
         return;
     }
-    db = openDatabase(shortName, version, displayName, maxSize);
-    db.transaction(function (tx) {
+    if (window.cordova.platformId === 'browser') {
+        db = window.openDatabase(dbParams.name, dbParams.version, dbParams.displayName, dbParams.estimatedSize);
+    } else {
+        db = window.sqlitePlugin.openDatabase({
+            name: dbParams.name,
+            location: 'default',
+            // androidDatabaseProvider: 'system'
+        });
+    }
+
+    db.transaction(function (transaction) {
         // tx.executeSql('DROP TABLE IF EXISTS bills');
         // tx.executeSql('DROP TABLE IF EXISTS bills_log');
         // tx.executeSql('DROP TABLE IF EXISTS events');
         // tx.executeSql('DROP TABLE IF EXISTS events_meta');
-        tx.executeSql(`
+        transaction.executeSql(`
             CREATE TABLE IF NOT EXISTS bills (
                 id INTEGER PRIMARY KEY,
                 title TEXT NOT NULL,
@@ -27,23 +39,23 @@ function db_init() {
                 lastpaidmonth TEXT,
                 description TEXT
             )
-        `, [], db_nullHandler, db_errorHandler);
-        tx.executeSql(`
+        `, [], dbNullHandler, dbErrorHandler);
+        transaction.executeSql(`
             CREATE TABLE IF NOT EXISTS bills_log (
                 id INTEGER PRIMARY KEY,
                 bill_id INTEGER NOT NULL,
                 date TEXT NOT NULL,
                 status TEXT NO NULL
             )
-        `, [], db_nullHandler, db_errorHandler);
-        // tx.executeSql(`
+        `, [], dbNullHandler, dbErrorHandler);
+        // transaction.executeSql(`
         //     CREATE TABLE IF NOT EXISTS events (
         //         id INTEGER PRIMARY KEY,
         //         title TEXT NOT NULL,
         //         normalized TEXT NOT NULL
         //     )
-        // `, [], db_nullHandler, db_errorHandler);
-        // tx.executeSql(`
+        // `, [], dbNullHandler, dbErrorHandler);
+        // transaction.executeSql(`
         //     CREATE TABLE IF NOT EXISTS events_meta (
         //         id INTEGER PRIMARY KEY,
         //         event_id INTEGER,
@@ -58,20 +70,21 @@ function db_init() {
         //         repeat_week TEXT,
         //         repeat_weekeday TEXT
         //     )
-        // `, [], db_nullHandler, db_errorHandler);
+        // `, [], dbNullHandler, dbErrorHandler);
         
-    }, db_errorHandler, db_successCallBack);
+    }, dbErrorHandler, dbSuccessCallBack);
 }
 
-function db_errorHandler(transaction, error) {
-    //alert('Error: ' + error.message + ' code: ' + error.code);
+function dbErrorHandler(transaction, error) {
+    alert('Error: ' + error.message + ' code: ' + error.code);
     //console.log('Error: ' + error.message + ' code: ' + error.code);
+    return true; //THIS IS IMPORTANT FOR TRANSACTION TO ROLLBACK ON QUERY ERROR
 }
 
-function db_successCallBack() {
+function dbSuccessCallBack() {
     //console.log("DEBUGGING: success");
 }
 
-function db_nullHandler() {
+function dbNullHandler() {
 
 }

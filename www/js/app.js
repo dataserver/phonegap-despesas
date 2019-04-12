@@ -1,7 +1,7 @@
 function listItems() {
 
     $('#databaseTable').html('');
-    db.transaction(function (transaction) {
+    db.readTransaction(function (transaction) {
         transaction.executeSql('SELECT * FROM bills ORDER BY day', [],
             function (transaction, result) {
                 if (result != null && result.rows != null) {
@@ -11,9 +11,6 @@ function listItems() {
                     for (let i = 0, len = result.rows.length; i < len; i++) {
                         rows[i] = result.rows.item(i);
                         rows[i].day = pad(rows[i].day);
-                        // if (rows[i].month != "") {
-                        //     rows[i].month = pad(rows[i].month);
-                        // }
                         rows[i].paid_this_month = (rows[i].lastpaidmonth == yyyymm) ? 1 : 0;
                     }
                     let template = $.templates("#theTmpl");
@@ -22,8 +19,8 @@ function listItems() {
                     });
                     $('#databaseTable').append(htmlOutput);
                 }
-            }, db_errorHandler);
-    }, db_errorHandler, db_nullHandler);
+            }, dbErrorHandler);
+    }, dbErrorHandler, dbNullHandler);
 
     return false;
 }
@@ -31,7 +28,7 @@ function viewLog() {
     let id = $('#form_edit [name="id"]').val();
     $('#logview').html('');
 
-    db.transaction(function (transaction) {
+    db.readTransaction(function (transaction) {
         transaction.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ', [id],
             function (transaction, result) {
                 if (result != null && result.rows != null) {
@@ -48,8 +45,8 @@ function viewLog() {
                     });
                     $('#logview').append(htmlOutput);
                 }
-            }, db_errorHandler);
-    }, db_errorHandler, db_nullHandler);
+            }, dbErrorHandler);
+    }, dbErrorHandler, dbNullHandler);
 
     return false;
 }
@@ -58,7 +55,7 @@ function searchItem() {
     var search = $('#search').val();
     search = URLify.normalizeName(search);
 
-    db.transaction(function (transaction) {
+    db.readTransaction(function (transaction) {
         transaction.executeSql(
             `SELECT * FROM bills WHERE normalized LIKE "%${search}%" `,
             [],
@@ -74,24 +71,25 @@ function searchItem() {
                 }
                 $('#databaseTable').html(`<ul>${li}</ul>`);
             },
-            db_errorHandler
+            dbErrorHandler
         );
-    }, db_errorHandler, db_nullHandler);
+    }, dbErrorHandler, dbNullHandler);
 
     return false;
 }
-
+// db.readTransaction() // optimized to ready
+// db.transaction()
 function addItem() {
     let title = $('#form_edit [name="title"]').val();
     let normalized = URLify.normalizeName(title);
-    normalized = normalized.toUpperCase();
+        normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
     let paid = $('#form_edit [name="paid"]').prop('checked');
-    paid = (paid) ? 1 : 0;
-    let lastpaidmonth = (paid==1) ? todayDate.yyyy + "" + todayDate.mm : null;
+    let lastpaidmonth = (paid) ? todayDate.yyyy + "" + todayDate.mm : null;
     let description = $('#form_edit [name="description"]').val();
 
     if (!isEmptyOrSpaces(title)) {
+        paid = (paid) ? 1 : 0;
         db.transaction(function (tx) {
             tx.executeSql(`
                 INSERT INTO bills
@@ -100,7 +98,7 @@ function addItem() {
                     (?, ?, ?, ?, ?, ?)
                 `,
                 [title, normalized, day, paid, lastpaidmonth, description],
-                db_nullHandler, db_errorHandler
+                dbNullHandler, dbErrorHandler
             );
         });
         window.history.back();
@@ -118,8 +116,8 @@ function deleteItem() {
             DELETE FROM bills where id=?
             `,
             [deleteById],
-            db_nullHandler,
-            db_errorHandler
+            dbNullHandler,
+            dbErrorHandler
         );
     });
     window.history.back();
@@ -130,23 +128,23 @@ function updateItem() {
 
     let title = $('#form_edit [name="title"]').val();
     let normalized = URLify.normalizeName(title);
-    normalized = normalized.toUpperCase();
+        normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
     let paid = $('#form_edit [name="paid"]').prop('checked');
-    paid = (paid) ? 1 : 0;
     let lastpaidmonth = $('#form_edit [name="lastpaidmonth"]').val();
-    lastpaidmonth = (paid == 0) ? null : lastpaidmonth;
+        lastpaidmonth = (paid) ? null : lastpaidmonth;
     let description = $('#form_edit [name="description"]').val();
 
 
     if (!isEmptyOrSpaces(title)) {
+        paid = (paid) ? 1 : 0;
         db.transaction(function (tx) {
             tx.executeSql(`
                 UPDATE bills SET title=?, normalized=?, day=?, paid=?, lastpaidmonth=?, description=? where id=?
                 `,
                 [title, normalized, day, paid, lastpaidmonth, description, selectedId],
-                db_nullHandler,
-                db_errorHandler
+                dbNullHandler,
+                dbErrorHandler
             );
         });
         window.history.back();
@@ -177,8 +175,8 @@ function showForm() {
 
                         populateForm(formEl, data);
                     }
-                }, db_errorHandler);
-        }, db_errorHandler, db_nullHandler);
+                }, dbErrorHandler);
+        }, dbErrorHandler, dbNullHandler);
 
         return false;
     } else { // New entry
@@ -188,20 +186,22 @@ function showForm() {
     }
 }
 
-function updatePaidStatus(id, paid = 1) {
-    let lastpaidmonth = (paid==1) ? todayDate.yyyy + "" + todayDate.mm : null;
+function updatePaidStatus(id, paid = true) {
+    let lastpaidmonth = (paid) ? todayDate.yyyy + "" + todayDate.mm : null;
     let date = todayDate.yyyy + "-" + todayDate.mm + "-" + todayDate.mm +" "+ todayTime.hh + ":" + todayTime.mm + ":" + todayTime.ss;
-    let paid_txt = (paid==1) ? "changed to paid" : "changed to unpaid"; 
+    let paid_txt = (paid) ? "changed to paid" : "changed to unpaid"; 
 
     if (!isEmptyOrSpaces(id)) {
+        paid = (paid)? 1 : 0;
         db.transaction(function (tx) {
             tx.executeSql(`
-                UPDATE bills SET paid=?, lastpaidmonth=? WHERE id=?
+                    UPDATE bills SET paid=?, lastpaidmonth=? WHERE id=?
                 `,
                 [paid, lastpaidmonth, id],
-                db_nullHandler,
-                db_errorHandler
+                dbNullHandler,
+                dbErrorHandler
             );
+
             tx.executeSql(`
                 INSERT INTO bills_log
                     (bill_id, date, status) 
@@ -209,7 +209,7 @@ function updatePaidStatus(id, paid = 1) {
                     (?, ?, ?)
                 `,
                 [id, date, paid_txt],
-                db_nullHandler, db_errorHandler
+                dbNullHandler, dbErrorHandler
             );
         });
         location.reload();
@@ -225,8 +225,8 @@ function clearLog(id) {
             DELETE FROM bills_log WHERE bill_id=?
             `,
             [id],
-            db_nullHandler,
-            db_errorHandler
+            dbNullHandler,
+            dbErrorHandler
         );
     });
     $("#logview").html('');
@@ -278,7 +278,7 @@ $( document ).ready(function() {
     if ($("#databaseTable").length) {
         listItems();
 
-        $(document).on("click", ".js-click-set-paid", function (e) {
+        $(document).on("click", ".js-set-paid", function (e) {
             e.preventDefault();
             let id = $(this).attr('data-id');
 
@@ -288,12 +288,12 @@ $( document ).ready(function() {
                 message: "Mark as Paid?",
                 callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
                     if (result) {
-                        updatePaidStatus(id, 1);
+                        updatePaidStatus(id, true);
                     } else { }
                 }
             });
         });
-        $(document).on("click", ".js-click-set-unpaid", function (e) {
+        $(document).on("click", ".js-set-unpaid", function (e) {
             e.preventDefault();
             let id = $(this).attr('data-id');
 
@@ -303,7 +303,7 @@ $( document ).ready(function() {
                 message: "Mark as Unpaid?",
                 callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
                     if (result) {
-                        updatePaidStatus(id, 0);
+                        updatePaidStatus(id, false);
                     } else { }
                 }
             });
