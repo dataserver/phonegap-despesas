@@ -81,14 +81,14 @@ function searchItem() {
     return false;
 }
 
-function saveItem() {
+function addItem() {
     let title = $('#form_edit [name="title"]').val();
     let normalized = URLify.normalizeName(title);
     normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
     let paid = $('#form_edit [name="paid"]').prop('checked');
     paid = (paid) ? 1 : 0;
-    let lastpaidmonth = null;
+    let lastpaidmonth = (paid==1) ? todayDate.yyyy + "" + todayDate.mm : null;
     let description = $('#form_edit [name="description"]').val();
 
     if (!isEmptyOrSpaces(title)) {
@@ -97,7 +97,7 @@ function saveItem() {
                 INSERT INTO bills
                     (title, normalized, day, paid, lastpaidmonth, description) 
                     VALUES 
-                    (?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?)
                 `,
                 [title, normalized, day, paid, lastpaidmonth, description],
                 db_nullHandler, db_errorHandler

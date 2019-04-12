@@ -74,17 +74,14 @@
                 <option value="11">November</option>
                 <option value="12">December</option>
             </select> 
-        </div> -->
-
-        <div class="form-check">
-            <label for="repeat">
-                <input class="form-check-input" type="checkbox" name="repeat" id="repeat" value="1"> Repeat monthly?
-            </label>
         </div>
         <div class="form-check">
-            <label for="paid">
-                <input class="form-check-input" type="checkbox" name="paid" id="paid" value="1"> Paid?
-            </label>
+            <input class="form-check-input" type="checkbox" name="repeat" id="repeat" value="1">
+            <label for="repeat">Repeat monthly?</label>
+        </div> -->
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="paid" id="paid" value="1">
+            <label for="paid">Mark as paid</label>
         </div>
         <div class="form-group">
             <label for="description">Description</label>
@@ -139,7 +136,7 @@
         <div style="display: flex; justify-content: space-between">
             <button class="btn btn-secondary" type="button" onClick="backMain()">Back</button>
             <button class="btn btn-primary" type="button" data-context="update" onClick="updateItem()">Update</button>
-            <button class="btn btn-primary" type="button" data-context="save" onClick="saveItem()">Save</button>
+            <button class="btn btn-primary" type="button" data-context="save" onClick="addItem()">Save</button>
             <button class="btn btn-danger"  type="button" data-context="update" onClick="deleteItem()">Delete</button>
         </div>
     </form>

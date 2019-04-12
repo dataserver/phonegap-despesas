@@ -13,8 +13,8 @@ function db_init() {
     }
     db = openDatabase(shortName, version, displayName, maxSize);
     db.transaction(function (tx) {
-        //tx.executeSql('DROP TABLE IF EXISTS bills');
-        //tx.executeSql('DROP TABLE IF EXISTS bills_log');
+        // tx.executeSql('DROP TABLE IF EXISTS bills');
+        // tx.executeSql('DROP TABLE IF EXISTS bills_log');
         // tx.executeSql('DROP TABLE IF EXISTS events');
         // tx.executeSql('DROP TABLE IF EXISTS events_meta');
         tx.executeSql(`
