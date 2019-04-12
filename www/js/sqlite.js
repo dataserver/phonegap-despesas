@@ -15,14 +15,14 @@ function db_init() {
     db.transaction(function (tx) {
         //tx.executeSql('DROP TABLE IF EXISTS bills');
         //tx.executeSql('DROP TABLE IF EXISTS bills_log');
+        // tx.executeSql('DROP TABLE IF EXISTS events');
+        // tx.executeSql('DROP TABLE IF EXISTS events_meta');
         tx.executeSql(`
             CREATE TABLE IF NOT EXISTS bills (
                 id INTEGER PRIMARY KEY,
                 title TEXT NOT NULL,
                 normalized TEXT NOT NULL,
                 day INTEGER,
-                month INTEGER,
-                repeat INTEGER DEFAULT 0,
                 paid INTEGER DEFAULT 0,
                 lastpaidmonth TEXT,
                 description TEXT
@@ -43,12 +43,14 @@ function db_init() {
         //         normalized TEXT NOT NULL
         //     )
         // `, [], db_nullHandler, db_errorHandler);
-        // ID    event_id      repeat_start       repeat_interval    repeat_year    repeat_month    repeat_day    repeat_week    repeat_weekday
         // tx.executeSql(`
         //     CREATE TABLE IF NOT EXISTS events_meta (
         //         id INTEGER PRIMARY KEY,
         //         event_id INTEGER,
+        //         time_start TEXT,
+        //         time_end TEXT,
         //         repeat_start TEXT,
+        //         repeat_end TEXT,
         //         repeat_interval TEXT,
         //         repeat_year TEXT,
         //         repeat_month TEXT,

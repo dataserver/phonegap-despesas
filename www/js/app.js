@@ -2,7 +2,7 @@ function listItems() {
 
     $('#databaseTable').html('');
     db.transaction(function (transaction) {
-        transaction.executeSql('SELECT * FROM bills;', [],
+        transaction.executeSql('SELECT * FROM bills ORDER BY day', [],
             function (transaction, result) {
                 if (result != null && result.rows != null) {
                     let rows = [];
@@ -11,9 +11,9 @@ function listItems() {
                     for (let i = 0, len = result.rows.length; i < len; i++) {
                         rows[i] = result.rows.item(i);
                         rows[i].day = pad(rows[i].day);
-                        if (rows[i].month != "") {
-                            rows[i].month = pad(rows[i].month);
-                        }
+                        // if (rows[i].month != "") {
+                        //     rows[i].month = pad(rows[i].month);
+                        // }
                         rows[i].paid_this_month = (rows[i].lastpaidmonth == yyyymm) ? 1 : 0;
                     }
                     let template = $.templates("#theTmpl");
@@ -86,9 +86,6 @@ function saveItem() {
     let normalized = URLify.normalizeName(title);
     normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
-    let month = $('#form_edit [name="month"]').val();
-    let repeat = $('#form_edit [name="repeat"]').prop('checked');
-    repeat = (repeat) ? 1 : 0;
     let paid = $('#form_edit [name="paid"]').prop('checked');
     paid = (paid) ? 1 : 0;
     let lastpaidmonth = null;
@@ -98,11 +95,11 @@ function saveItem() {
         db.transaction(function (tx) {
             tx.executeSql(`
                 INSERT INTO bills
-                    (title, normalized, day, month, repeat, paid, lastpaidmonth, description) 
+                    (title, normalized, day, paid, lastpaidmonth, description) 
                     VALUES 
                     (?, ?, ?, ?, ?, ?, ?, ?)
                 `,
-                [title, normalized, day, month, repeat, paid, lastpaidmonth, description],
+                [title, normalized, day, paid, lastpaidmonth, description],
                 db_nullHandler, db_errorHandler
             );
         });
@@ -135,9 +132,6 @@ function updateItem() {
     let normalized = URLify.normalizeName(title);
     normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
-    let month = $('#form_edit [name="month"]').val();
-    let repeat = $('#form_edit [name="repeat"]').prop('checked');
-    repeat = (repeat) ? 1 : 0;
     let paid = $('#form_edit [name="paid"]').prop('checked');
     paid = (paid) ? 1 : 0;
     let lastpaidmonth = $('#form_edit [name="lastpaidmonth"]').val();
@@ -148,9 +142,9 @@ function updateItem() {
     if (!isEmptyOrSpaces(title)) {
         db.transaction(function (tx) {
             tx.executeSql(`
-                UPDATE bills SET title=?, normalized=?, day=?, month=?, repeat=?, paid=?, lastpaidmonth=?, description=? where id=?
+                UPDATE bills SET title=?, normalized=?, day=?, paid=?, lastpaidmonth=?, description=? where id=?
                 `,
-                [title, normalized, day, month, repeat, paid, lastpaidmonth, description, selectedId],
+                [title, normalized, day, paid, lastpaidmonth, description, selectedId],
                 db_nullHandler,
                 db_errorHandler
             );
@@ -316,6 +310,11 @@ $( document ).ready(function() {
                 }
             });
         });
+        // $(document).on("change", "#repeat_interval", function(e){
+        //     let val = $(this).val();
+        //     $("#repeat_interval_value").html(val + ' days');
+
+        // });
     }
 
 });

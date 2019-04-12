@@ -57,7 +57,7 @@
                 <option value="31">31</option>
             </select>
         </div>
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label for="month">Month</label>
             <select class="form-control" name="month" id="month">
                 <option value=""></option>
@@ -74,7 +74,8 @@
                 <option value="11">November</option>
                 <option value="12">December</option>
             </select> 
-        </div>
+        </div> -->
+
         <div class="form-check">
             <label for="repeat">
                 <input class="form-check-input" type="checkbox" name="repeat" id="repeat" value="1"> Repeat monthly?
@@ -89,6 +90,52 @@
             <label for="description">Description</label>
             <textarea class="form-control" name="description" id="description"></textarea>
         </div>
+
+
+        <!-- 
+        Note that you simply need to either specify a (repeat_interval) OIR a set of (repeat_year, repeat_month, repeat_day, repeat_week, and repeat_weekday data).
+        <fieldset>
+            <legend>Recurrence</legend>
+            
+            <div class="form-check">
+                <label for="repeat_day">
+                    <input class="form-check-input" type="checkbox" name="repeat_day" id="repeat_day" value="*"> Repeat daily?
+                </label>
+            </div>
+            <div class="form-check">
+                <label for="repeat_month">
+                    <input class="form-check-input" type="checkbox" name="repeat_month" id="repeat_month" value="*"> Repeat monthly?
+                </label>
+            </div>
+            <div class="form-check">
+                <label for="repeat_year">
+                    <input class="form-check-input" type="checkbox" name="repeat_year" id="repeat_year" value="*"> Repeat yearly?
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="repeat_interval">Every X days</label>
+                <input type="number" class="form-control" name="repeat_interval" id="repeat_interval" min="2" max="365" value="">
+            </div>
+
+            <div class="form-group">
+                <label for="repeat_week">Every X weeks</label>
+                <input type="number" class="form-control" name="repeat_week" id="repeat_week" min="2" max="50" value="">
+            </div>
+            <div class="form-group">
+                <label for="repeat_weekday">Every Day of week</label>
+                <select class="form-control" name="repeat_weekday" id="repeat_weekday">
+                    <option value=""></option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
+                </select> 
+            </div>
+        </fieldset> -->
+
         <div style="display: flex; justify-content: space-between">
             <button class="btn btn-secondary" type="button" onClick="backMain()">Back</button>
             <button class="btn btn-primary" type="button" data-context="update" onClick="updateItem()">Update</button>
