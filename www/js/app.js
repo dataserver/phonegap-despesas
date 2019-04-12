@@ -1,9 +1,9 @@
 function listItems() {
 
     $('#databaseTable').html('');
-    db.readTransaction(function (transaction) {
-        transaction.executeSql('SELECT * FROM bills ORDER BY day', [],
-            function (transaction, result) {
+    db.readTransaction(function (tx) {
+        tx.executeSql('SELECT * FROM bills ORDER BY day', [],
+            function (tx, result) {
                 if (result != null && result.rows != null) {
                     let rows = [];
                     let yyyymm = todayDate.yyyy + "" + todayDate.mm;
@@ -28,12 +28,12 @@ function viewLog() {
     let id = $('#form_edit [name="id"]').val();
     $('#logview').html('');
 
-    db.readTransaction(function (transaction) {
-        transaction.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ', [id],
+    db.readTransaction(function (tx) {
+        tx.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ', [id],
             function (transaction, result) {
                 if (result != null && result.rows != null) {
                     let rows = [];
-                    let yyyymm = todayDate.yyyy + "" + todayDate.mm;
+                    let yyyymm = todayDate.yyyy +''+ todayDate.mm;
 
                     for (let i = 0, len = result.rows.length; i < len; i++) {
                         rows[i] = result.rows.item(i);
@@ -55,11 +55,11 @@ function searchItem() {
     var search = $('#search').val();
     search = URLify.normalizeName(search);
 
-    db.readTransaction(function (transaction) {
-        transaction.executeSql(
+    db.readTransaction(function (tx) {
+        tx.executeSql(
             `SELECT * FROM bills WHERE normalized LIKE "%${search}%" `,
             [],
-            function (transaction, result) {
+            function (tx, result) {
                 let li = '';
                 if (result != null && result.rows != null && result.rows.length > 0) {
                     for (let i = 0; i < result.rows.length; i++) {
@@ -69,7 +69,10 @@ function searchItem() {
                 } else {
                     li = '<li>Not found. Try again.</li>';
                 }
-                $('#databaseTable').html(`<ul>${li}</ul>`);
+                $('#databaseTable').html(`
+                    <ul>${li}</ul>
+                    <input class="btn btn-secondary" type="button" value="Show Items" onClick="listItems()">
+                `);
             },
             dbErrorHandler
         );
@@ -85,11 +88,18 @@ function addItem() {
         normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
     let paid = $('#form_edit [name="paid"]').prop('checked');
-    let lastpaidmonth = (paid) ? todayDate.yyyy + "" + todayDate.mm : null;
+        paid = (paid) ? 1 : 0;
+    let lastpaidmonth = (paid == 1) ? todayDate.yyyy +''+ todayDate.mm : null;
     let description = $('#form_edit [name="description"]').val();
 
+    let form = document.getElementById('form_edit');
+    if (form.checkValidity() === false){
+        toastr.error(`Some field is empty`);
+    }
+    form.classList.add('was-validated');
+
+
     if (!isEmptyOrSpaces(title)) {
-        paid = (paid) ? 1 : 0;
         db.transaction(function (tx) {
             tx.executeSql(`
                 INSERT INTO bills
@@ -103,8 +113,6 @@ function addItem() {
         });
         window.history.back();
         // return false;
-    } else {
-        alert(`Some field is empty`);
     }
 }
 
@@ -124,6 +132,7 @@ function deleteItem() {
 }
 
 function updateItem() {
+    $(':focus').blur();
     let selectedId = getParameterByName("id");
 
     let title = $('#form_edit [name="title"]').val();
@@ -131,16 +140,21 @@ function updateItem() {
         normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
     let paid = $('#form_edit [name="paid"]').prop('checked');
+        paid = (paid) ? 1 : 0;
     let lastpaidmonth = $('#form_edit [name="lastpaidmonth"]').val();
-        lastpaidmonth = (paid) ? null : lastpaidmonth;
+        lastpaidmonth = (paid == 1) ? null : lastpaidmonth;
     let description = $('#form_edit [name="description"]').val();
 
-
+    let form = document.getElementById('form_edit');
+    if (form.checkValidity() === false){
+        toastr.error(`Some field is empty`);
+    }
+    form.classList.add('was-validated');
     if (!isEmptyOrSpaces(title)) {
-        paid = (paid) ? 1 : 0;
+        
         db.transaction(function (tx) {
             tx.executeSql(`
-                UPDATE bills SET title=?, normalized=?, day=?, paid=?, lastpaidmonth=?, description=? where id=?
+                UPDATE bills SET title=?, normalized=?, day=?, paid=?, lastpaidmonth=?, description=? WHERE id=?
                 `,
                 [title, normalized, day, paid, lastpaidmonth, description, selectedId],
                 dbNullHandler,
@@ -149,8 +163,6 @@ function updateItem() {
         });
         window.history.back();
         // return false;
-    } else {
-        alert(`Some field is empty`);
     }
 }
 
@@ -161,18 +173,19 @@ function backMain() {
 function showForm() {
     let id = getParameterByName('id');
 
+    $(".js-section-button-add-item").hide();
+    $(".js-section-button-edit-item").hide();
+
     if (id != 0) {
-        db.transaction(function (tx) {
-            tx.executeSql('SELECT * FROM bills WHERE id=?', [id],
-                function (tx, result) {
+        $(".js-section-button-edit-item").show();
+        db.transaction(function (transaction) {
+            transaction.executeSql('SELECT * FROM bills WHERE id=?', [id],
+                function (transaction, result) {
                     if (result != null && result.rows != null) {
                         let data = result.rows.item(0);
                         let formEl = document.querySelector('#form_edit');
 
                         $("#page_title").text('Edit');
-                        $("#form_edit button[data-context]").hide();
-                        $("#form_edit button[data-context='update']").show();
-
                         populateForm(formEl, data);
                     }
                 }, dbErrorHandler);
@@ -180,43 +193,36 @@ function showForm() {
 
         return false;
     } else { // New entry
-        $("#page_title").text("New entry");
-        $("#form_edit button[data-context]").hide();
-        $("#form_edit button[data-context='save']").show();
+        $(".js-section-button-add-item").show();
+        $("#page_title").text("Add new entry");
     }
 }
 
-function updatePaidStatus(id, paid = true) {
-    let lastpaidmonth = (paid) ? todayDate.yyyy + "" + todayDate.mm : null;
-    let date = todayDate.yyyy + "-" + todayDate.mm + "-" + todayDate.mm +" "+ todayTime.hh + ":" + todayTime.mm + ":" + todayTime.ss;
-    let paid_txt = (paid) ? "changed to paid" : "changed to unpaid"; 
+function updatePaidStatus(id, paid = 1) {
+    $(':focus').blur();
+    let lastpaidmonth = (paid == 1) ? todayDate.yyyy +''+ todayDate.mm : null;
+    let datetime = todayDate.yyyy + "-" + todayDate.mm + "-" + todayDate.mm +" "+ todayTime.hh + ":" + todayTime.mm + ":" + todayTime.ss;
+    let paid_txt = (paid == 1) ? "changed to paid" : "changed to unpaid";
 
-    if (!isEmptyOrSpaces(id)) {
-        paid = (paid)? 1 : 0;
-        db.transaction(function (tx) {
-            tx.executeSql(`
-                    UPDATE bills SET paid=?, lastpaidmonth=? WHERE id=?
-                `,
-                [paid, lastpaidmonth, id],
-                dbNullHandler,
-                dbErrorHandler
-            );
-
-            tx.executeSql(`
-                INSERT INTO bills_log
-                    (bill_id, date, status) 
-                    VALUES 
-                    (?, ?, ?)
-                `,
-                [id, date, paid_txt],
-                dbNullHandler, dbErrorHandler
-            );
-        });
-        location.reload();
-        //return false;
-    } else {
-        alert(`Update failed`);
-    }
+    db.transaction(function (tx) {
+        tx.executeSql(`
+                UPDATE bills SET paid=?, lastpaidmonth=? WHERE id=?
+            `,
+            [paid, lastpaidmonth, id],
+            dbNullHandler,
+            dbErrorHandler
+        );
+        tx.executeSql(`
+            INSERT INTO bills_log
+                (bill_id, date, status) 
+                VALUES 
+                (?, ?, ?)
+            `,
+            [id, datetime, paid_txt],
+            dbNullHandler, dbErrorHandler
+        );
+    });
+    listItems();
 }
 
 function clearLog(id) {
@@ -238,7 +244,7 @@ var today = new Date();
 var todayDate = {
     dd : String(today.getDate()).padStart(2, '0'),
     mm : String(today.getMonth() + 1).padStart(2, '0'),
-    yyyy : today.getFullYear()
+    yyyy : String(today.getFullYear())
 };
 var todayTime = {
     hh : String(today.getHours()).padStart(2, '0'),
@@ -263,7 +269,7 @@ toastr.options = {
   "hideMethod": "fadeOut"
 };
 
-$( document ).ready(function() {
+window.onload = function () {
 
     db_init();
 
@@ -279,7 +285,6 @@ $( document ).ready(function() {
         listItems();
 
         $(document).on("click", ".js-set-paid", function (e) {
-            e.preventDefault();
             let id = $(this).attr('data-id');
 
             bootbox.confirm({
@@ -288,13 +293,12 @@ $( document ).ready(function() {
                 message: "Mark as Paid?",
                 callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
                     if (result) {
-                        updatePaidStatus(id, true);
+                        updatePaidStatus(id, 1);
                     } else { }
                 }
             });
         });
         $(document).on("click", ".js-set-unpaid", function (e) {
-            e.preventDefault();
             let id = $(this).attr('data-id');
 
             bootbox.confirm({
@@ -303,7 +307,7 @@ $( document ).ready(function() {
                 message: "Mark as Unpaid?",
                 callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
                     if (result) {
-                        updatePaidStatus(id, false);
+                        updatePaidStatus(id, 0);
                     } else { }
                 }
             });
@@ -312,8 +316,37 @@ $( document ).ready(function() {
     if ($("#form_edit").length) {
         showForm();
 
+        $(".js-back-main").click(function(e){
+            $(this).focus();
+            backMain();
+        });
+        $(".js-update-item").click(function(e){
+            $(this).focus();
+            updateItem();
+        });
+        $(".js-add-item").click(function(e){
+            $(this).focus();
+            addItem();
+        });
+        $(".js-view-log").click(function(e){
+            $(this).focus();
+            viewLog();
+        });
+        $(".js-delete-item").click(function(e){
+            $(this).focus();
+            bootbox.confirm({
+                size: "small",
+                centerVertical: true,
+                message: "DELETE: Are you sure?",
+                callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
+                    if (result) {
+                        deleteItem();
+                    } else { }
+                }
+            });            
+        });
+        
         $(document).on("click", ".js-log-clean", function (e) {
-            e.preventDefault();
             let id = $(this).attr('data-id');
 
             bootbox.confirm({
@@ -334,4 +367,4 @@ $( document ).ready(function() {
         // });
     }
 
-});
+};

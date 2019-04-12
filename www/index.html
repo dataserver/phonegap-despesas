@@ -22,8 +22,7 @@
         <input class="form-control" type="text" name="search" id="search" placeholder="Title">
     </div>
     <div style="display: flex; justify-content: space-between">
-        <button class="btn btn-primary" onclick="window.location.href='edit.html?id=0'">New</button>
-        <input class="btn btn-primary" type="button" value="Show Items" onClick="listItems()">
+        <button class="btn btn-primary" onclick="window.location.href='edit.html?id=0'">Add</button>
     </div>
     <div id="databaseTable" class="mt-4">
     </div>
@@ -49,7 +48,7 @@
                 {{else}}
                     <td><span class="js-set-paid btn btn-outline-light btn-sm" data-id="{{:id}}"><i class="fa fa-close"></i></span></td>
                 {{/if}}
-                <!-- <td><span class="js-view-options btn btn-outline-light btn-sm" data-id="{{:id}}">...</span></td> -->
+                <!-- <td><span class="js-options btn btn-outline-light btn-sm" data-id="{{:id}}">...</span></td> -->
             </tr>
             {{/for}}
         </tbody>

@@ -15,12 +15,14 @@
 <div class="container-fluid my-3">
 
     <h1 id="page_title"></h1>
-    <form id="form_edit">
+    <form id="form_edit" class="needs-validation" novalidate>
         <input type="hidden" name="id" type="text" value="">
         <input type="hidden" name="lastpaidmonth" type="text" value="">
         <div class="form-group">
             <label for="title">Title</label>
-            <input class="form-control" name="title"  id="title"  type="text" value="" required>
+            <input class="form-control" name="title"  id="title" placeholder="Title" type="text" value="" required>
+            <div class="invalid-feedback">Please include a name.</div>
+            <div class="valid-feedback">ok!</div>
         </div>
         <div class="form-group">
             <label for="day">Day</label>
@@ -57,6 +59,7 @@
                 <option value="30">30</option>
                 <option value="31">31</option>
             </select>
+            <div class="valid-feedback">ok!</div>
         </div>
         <!-- <div class="form-group">
             <label for="month">Month</label>
@@ -83,10 +86,12 @@
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="paid" id="paid" value="1">
             <label for="paid">Mark as paid</label>
+            <div class="valid-feedback">ok!</div>
         </div>
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea class="form-control" name="description" id="description"></textarea>
+            <textarea class="form-control" name="description" id="description" placeholder="Some description"></textarea>
+            <div class="valid-feedback">ok!</div>
         </div>
 
 
@@ -133,18 +138,36 @@
                 </select> 
             </div>
         </fieldset> -->
-
-        <div style="display: flex; justify-content: space-between">
-            <button class="btn btn-secondary" type="button" onClick="backMain()">Back</button>
-            <button class="btn btn-primary" type="button" data-context="update" onClick="updateItem()">Update</button>
-            <button class="btn btn-primary" type="button" data-context="save" onClick="addItem()">Save</button>
-            <button class="btn btn-danger"  type="button" data-context="update" onClick="deleteItem()">Delete</button>
-        </div>
     </form>
-    <div id="logview" class="mt-4">
-        <div class="text-center">
-            <button class="btn btn-secondary btn-sm" type="button" onClick="viewLog()">View Log</button>
+    <div style="display: none;" class="js-section-button-add-item">
+        <div class="row">
+            <div class="col">
+                <button class="js-back-main btn btn-secondary" type="button">Back</button>
+            </div>
+            <div class="col text-center">
+                <button class="js-add-item btn btn-primary" type="button" data-context="save">Add Bill</button>
+            </div>
         </div>
+    </div>
+    <div style="display: none" class="js-section-button-edit-item">
+        <div class="row">
+            <div class="col">
+                <button class="js-back-main btn btn-secondary" type="button">Back</button>
+            </div>
+            <div class="col text-center">
+                <button class="js-update-item btn btn-primary" type="button" data-context="update">Update</button>
+            </div>
+            <div class="col text-right">
+                <button class="js-delete-item btn btn-light"  type="button" data-context="update"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col">
+                <button class="js-view-log btn btn-secondary btn-sm" type="button">View Log</button>
+            </div>
+        </div>
+    </div>
+    <div id="logview" class="mt-4">
     </div>
 </div>
 <script id="logTmpl" type="text/x-jsrender">
@@ -166,7 +189,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="2" class="text-right">
+                    <td colspan="2" class="text-center">
                         <button type="button" class="js-log-clean btn btn-danger" data-id="{{:bill_id}}">Clean Log</button>
                     </td>
                 </tr>

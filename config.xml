@@ -17,6 +17,7 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <access origin="*" />
+    <preference name="KeyboardDisplayRequiersUserAction" value="false"/>
     <plugin name="cordova-plugin-whitelist" spec="1.3.3" source="npm" />
     <plugin name="cordova-sqlite-evcore-extbuild-free" spec="0.9.10" source="npm" />
     <platform name="android">
