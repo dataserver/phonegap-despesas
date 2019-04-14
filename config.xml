@@ -3,7 +3,7 @@
     xmlns="http://www.w3.org/ns/widgets" 
     xmlns:gap="http://phonegap.com/ns/1.0"
     id="com.github.dataserver.despesas" 
-    version="5" 
+    version="6" 
 >
     <name>Monthly bills checker</name>
     <description>
@@ -36,7 +36,7 @@
         <splash src="res/screen/android/drawable-xhdpi/screen.png" density="port-xhdpi"/>
         <splash src="res/screen/android/drawable-xxhdpi/screen.png" density="port-xxhdpi"/>
         <splash src="res/screen/android/drawable-xxxhdpi/screen.png" density="port-xxxhdpi"/>
-        
+
         <config-file target="AndroidManifest.xml" parent="/*" mode="merge">
             <uses-permission android:name="android.permission.CAMERA" />
             <uses-feature android:name="android.hardware.camera" />
