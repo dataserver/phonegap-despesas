@@ -13,7 +13,7 @@
         dataserver
     </author>
     <content src="index.html" />
-    <preference name="phonegap-version" value="cli-6.5.0" />
+    <preference name="phonegap-version" value="cli-7.1.0" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <access origin="*" />
@@ -37,10 +37,9 @@
         <splash src="res/screen/android/drawable-xxhdpi/screen.png" density="port-xxhdpi"/>
         <splash src="res/screen/android/drawable-xxxhdpi/screen.png" density="port-xxxhdpi"/>
 
-        <config-file target="AndroidManifest.xml" parent="/manifest">
+        <config-file target="AndroidManifest.xml" parent="/*" mode="merge">
             <uses-permission android:name="android.permission.CAMERA" />
-            <uses-permission android:name="android.permission.FLASHLIGHT"/>
-            <uses-feature android:name="android.hardware.camera" android:required="true" />
+            <uses-feature android:name="android.hardware.camera" />
             <uses-feature android:name="android.hardware.camera.autofocus" />
         </config-file>
     </platform>
