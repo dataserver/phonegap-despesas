@@ -20,6 +20,7 @@
     <preference name="KeyboardDisplayRequiersUserAction" value="false"/>
     <plugin name="cordova-plugin-whitelist" spec="1.3.3" source="npm" />
     <plugin name="cordova-sqlite-evcore-extbuild-free" spec="0.9.10" source="npm" />
+    <plugin name="cordova-plugin-barcodescanner" spec="0.7.4" source="npm" />
     <platform name="android">
         <!-- you can use any density that exists in the Android project -->
         <splash src="res/screen/android/drawable-land-hdpi/screen.png" density="land-hdpi"/>
@@ -42,4 +43,10 @@
     <icon src="res/screen/android/drawable-xhdpi/icon.png" platform="android" qualifier="xhdpi" />
     <icon src="res/screen/android/drawable-xxhdpi/icon.png" platform="android" qualifier="xxhdpi" />
     <icon src="res/screen/android/drawable-xxxhdpi/icon.png" platform="android" qualifier="xxxhdpi" />
+
+    <config-file target="AndroidManifest.xml" parent="/*" mode="merge">
+        <uses-permission android:name="android.permission.CAMERA" />
+        <uses-feature android:name="android.hardware.camera" />
+        <uses-feature android:name="android.hardware.camera.autofocus" />
+    </config-file>
 </widget>

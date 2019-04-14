@@ -132,7 +132,6 @@ function deleteItem() {
 }
 
 function updateItem() {
-    $(':focus').blur();
     let selectedId = getParameterByName("id");
 
     let title = $('#form_edit [name="title"]').val();
@@ -199,7 +198,6 @@ function showForm() {
 }
 
 function updatePaidStatus(id, paid = 1) {
-    $(':focus').blur();
     let lastpaidmonth = (paid == 1) ? todayDate.yyyy +''+ todayDate.mm : null;
     let datetime = todayDate.yyyy + "-" + todayDate.mm + "-" + todayDate.mm +" "+ todayTime.hh + ":" + todayTime.mm + ":" + todayTime.ss;
     let paid_txt = (paid == 1) ? "changed to paid" : "changed to unpaid";
@@ -251,22 +249,35 @@ var todayTime = {
     mm : String(today.getMinutes() + 1).padStart(2, '0'),
     ss : String(today.getSeconds()).padStart(2, '0')
 };
+var barcodeScannerOptions = {
+    preferFrontCamera : false,    // iOS and Android
+    showFlipCameraButton : false, // iOS and Android
+    showTorchButton : true,       // iOS and Android
+    torchOn: false,               // Android, launch with the torch switched on (if available)
+    saveHistory: false,           // Android, save scan history (default false)
+    prompt : "Place a barcode inside the scan area", // Android
+    resultDisplayDuration: 0,     // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+    formats : "QR_CODE",          // default: all but PDF_417 and RSS_EXPANDED
+    orientation : "portrait",     // Android only (portrait|landscape), default unset so it rotates with the device
+    disableAnimations : true,     // iOS
+    disableSuccessBeep: false     // iOS and Android
+};
 toastr.options = {
-  "closeButton": false,
-  "debug": false,
-  "newestOnTop": true,
-  "progressBar": false,
-  "positionClass": "toast-top-center",
-  "preventDuplicates": false,
-  "onclick": null,
-  "showDuration": "300",
-  "hideDuration": "1000",
-  "timeOut": "5000",
-  "extendedTimeOut": "1000",
-  "showEasing": "swing",
-  "hideEasing": "linear",
-  "showMethod": "fadeIn",
-  "hideMethod": "fadeOut"
+    "closeButton": false,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": false,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
 };
 
 window.onload = function () {
@@ -315,6 +326,21 @@ window.onload = function () {
     }
     if ($("#form_edit").length) {
         showForm();
+
+        $(".js-scan-qrcode").click(function(e){
+            let target_el = $(this).attr("data-target");
+
+            cordova.plugins.barcodeScanner.scan(
+                function (result) {
+                    $(`#form_edit [name="${target_el}"]`).val( result.text );
+                    // alert("We got a barcode\n" + "Result: " + result.text + "\n" + "Format: " + result.format + "\n" + "Cancelled: " + result.cancelled);
+                },
+                function (error) {
+                    alert("Scanning failed: " + error);
+                },
+                barcodeScannerOptions
+            );
+        });
 
         $(".js-back-main").click(function(e){
             $(this).focus();
