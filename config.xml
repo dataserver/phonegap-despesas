@@ -37,7 +37,7 @@
         <splash src="res/screen/android/drawable-xxhdpi/screen.png" density="port-xxhdpi"/>
         <splash src="res/screen/android/drawable-xxxhdpi/screen.png" density="port-xxxhdpi"/>
 
-        <config-file target="AndroidManifest.xml" parent="/*" mode="merge">
+        <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.CAMERA" />
             <uses-feature android:name="android.hardware.camera" />
             <uses-feature android:name="android.hardware.camera.autofocus" />
