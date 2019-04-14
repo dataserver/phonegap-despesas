@@ -36,6 +36,12 @@
         <splash src="res/screen/android/drawable-xhdpi/screen.png" density="port-xhdpi"/>
         <splash src="res/screen/android/drawable-xxhdpi/screen.png" density="port-xxhdpi"/>
         <splash src="res/screen/android/drawable-xxxhdpi/screen.png" density="port-xxxhdpi"/>
+        
+        <config-file target="AndroidManifest.xml" parent="/*" mode="merge">
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-feature android:name="android.hardware.camera" />
+            <uses-feature android:name="android.hardware.camera.autofocus" />
+        </config-file>
     </platform>
     <icon src="res/screen/android/drawable-ldpi/icon.png" platform="android" qualifier="ldpi" />
     <icon src="res/screen/android/drawable-mdpi/icon.png" platform="android" qualifier="mdpi" />
@@ -44,9 +50,4 @@
     <icon src="res/screen/android/drawable-xxhdpi/icon.png" platform="android" qualifier="xxhdpi" />
     <icon src="res/screen/android/drawable-xxxhdpi/icon.png" platform="android" qualifier="xxxhdpi" />
 
-    <config-file target="AndroidManifest.xml" parent="/*" mode="merge">
-        <uses-permission android:name="android.permission.CAMERA" />
-        <uses-feature android:name="android.hardware.camera" />
-        <uses-feature android:name="android.hardware.camera.autofocus" />
-    </config-file>
 </widget>
