@@ -12,9 +12,15 @@
 </head>
 <body>
 
-<div class="container-fluid my-3">
+<div class="fixed-top">
+    <div class="bg-dark text-white p-2" role="alert">
+        <h3 id="page_title"></h3>
+    </div>
+</div>
 
-    <h1 id="page_title"></h1>
+<div class="header-bg-spacing"></div>
+
+<div class="container-fluid my-3">
     <form id="form_edit" class="needs-validation" novalidate>
         <input type="hidden" name="id" type="text" value="">
         <input type="hidden" name="lastpaidmonth" type="text" value="">
@@ -61,6 +67,7 @@
             </select>
             <div class="valid-feedback">ok!</div>
         </div>
+        
         <!-- <div class="form-group">
             <label for="month">Month</label>
             <select class="form-control" name="month" id="month">
@@ -83,6 +90,7 @@
             <input class="form-check-input" type="checkbox" name="repeat" id="repeat" value="1">
             <label for="repeat">Repeat monthly?</label>
         </div> -->
+
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="paid" id="paid" value="1">
             <label for="paid">Mark as paid</label>
@@ -93,7 +101,6 @@
             <textarea class="form-control" name="description" id="description" placeholder="Some description"></textarea>
             <div class="valid-feedback">ok!</div>
         </div>
-
 
         <!-- 
         Note that you simply need to either specify a (repeat_interval) OIR a set of (repeat_year, repeat_month, repeat_day, repeat_week, and repeat_weekday data).
@@ -138,6 +145,7 @@
                 </select> 
             </div>
         </fieldset> -->
+        
     </form>
     <div style="display: none;" class="js-section-button-add-item">
         <div class="row">
@@ -152,7 +160,7 @@
     <div style="display: none" class="js-section-button-edit-item">
         <div class="row">
             <div class="col">
-                <button class="js-back-main btn btn-secondary" type="button">Back</button>
+                <button class="js-back-main btn btn-secondary" type="button"><i class="fa fa-chevron-left" aria-hidden="true"></i> Back</button>
             </div>
             <div class="col text-center">
                 <button class="js-update-item btn btn-primary" type="button" data-context="update">Update</button>
@@ -161,15 +169,22 @@
                 <button class="js-delete-item btn btn-light"  type="button" data-context="update"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
             </div>
         </div>
-        <div class="row mt-4">
+    </div>
+    <div class="alert alert-secondary  mt-4" role="alert">
+        <div class="row">
             <div class="col">
-                <button class="js-view-log btn btn-secondary btn-sm" type="button">View Log</button>
+                    History                
+            </div>
+            <div class="col text-right">
+                <span class="js-view-log" data-status="closed"><i class="fa fa-chevron-down" aria-hidden="true"></i></span>
             </div>
         </div>
     </div>
     <div id="logview" class="mt-4">
     </div>
+
 </div>
+
 <script id="logTmpl" type="text/x-jsrender">
     <div class="mt-4">
         <table class="table">
@@ -177,6 +192,7 @@
                 <tr>
                     <th>Date</th>
                     <th>Status</th>
+                    <th>Value</th>
                 </tr>
             </thead>
             <tbody>
@@ -184,12 +200,22 @@
                 <tr>
                     <td>{{:date}}</td>
                     <td>{{:status}}</td>
+                    <td>
+                        {{if value!='0.0'}}
+                            $ {{:value}}
+                        {{/if}}
+                    </td>
                 </tr>
                 {{/for}}
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="2" class="text-center">
+                    <td></td>
+                    <td></td>
+                    <td>$ {{:total}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="text-center">
                         <button type="button" class="js-log-clean btn btn-danger" data-id="{{:bill_id}}">Clean Log</button>
                     </td>
                 </tr>

@@ -24,29 +24,33 @@ function listItems() {
 
     return false;
 }
-function viewLog() {
+function viewLog(show = true) {
     let id = $('#form_edit [name="id"]').val();
     $('#logview').html('');
+    if (show) {
+        db.readTransaction(function (tx) {
+            tx.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ', [id],
+                function (transaction, result) {
+                    if (result != null && result.rows != null) {
+                        let rows = [];
+                        let total = 0;
+                        let yyyymm = todayDate.yyyy +''+ todayDate.mm;
 
-    db.readTransaction(function (tx) {
-        tx.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ', [id],
-            function (transaction, result) {
-                if (result != null && result.rows != null) {
-                    let rows = [];
-                    let yyyymm = todayDate.yyyy +''+ todayDate.mm;
-
-                    for (let i = 0, len = result.rows.length; i < len; i++) {
-                        rows[i] = result.rows.item(i);
+                        for (let i = 0, len = result.rows.length; i < len; i++) {
+                            rows[i] = result.rows.item(i);
+                            total = total + ((rows[i].value) ? Number(rows[i].value) : 0);
+                        }
+                        let template = $.templates("#logTmpl");
+                        let htmlOutput = template.render({
+                            bill_id: id,
+                            rows: rows,
+                            total: total
+                        });
+                        $('#logview').append(htmlOutput);
                     }
-                    let template = $.templates("#logTmpl");
-                    let htmlOutput = template.render({
-                        bill_id: id,
-                        rows: rows
-                    });
-                    $('#logview').append(htmlOutput);
-                }
-            }, dbErrorHandler);
-    }, dbErrorHandler, dbNullHandler);
+                }, dbErrorHandler);
+        }, dbErrorHandler, dbNullHandler);
+    }
 
     return false;
 }
@@ -197,10 +201,13 @@ function showForm() {
     }
 }
 
-function updatePaidStatus(id, paid = 1) {
+function updatePaidStatus(id, paid = 1, value = '') {
     let lastpaidmonth = (paid == 1) ? todayDate.yyyy +''+ todayDate.mm : null;
     let datetime = todayDate.yyyy + "-" + todayDate.mm + "-" + todayDate.mm +" "+ todayTime.hh + ":" + todayTime.mm + ":" + todayTime.ss;
     let paid_txt = (paid == 1) ? "changed to paid" : "changed to unpaid";
+        value = (value == '') ? '0' : value;
+        value = parseFloat(value.replace(',','.').replace(' ',''));
+        value = Number(value);
 
     db.transaction(function (tx) {
         tx.executeSql(`
@@ -212,11 +219,11 @@ function updatePaidStatus(id, paid = 1) {
         );
         tx.executeSql(`
             INSERT INTO bills_log
-                (bill_id, date, status) 
+                (bill_id, date, value, status) 
                 VALUES 
-                (?, ?, ?)
+                (?, ?, ?,?)
             `,
-            [id, datetime, paid_txt],
+            [id, datetime, value, paid_txt],
             dbNullHandler, dbErrorHandler
         );
     });
@@ -250,34 +257,34 @@ var todayTime = {
     ss : String(today.getSeconds()).padStart(2, '0')
 };
 var barcodeScannerOptions = {
-    preferFrontCamera : false,    // iOS and Android
-    showFlipCameraButton : false, // iOS and Android
-    showTorchButton : true,       // iOS and Android
-    torchOn: false,               // Android, launch with the torch switched on (if available)
-    saveHistory: false,           // Android, save scan history (default false)
+    preferFrontCamera : false,                       // iOS and Android
+    showFlipCameraButton : false,                    // iOS and Android
+    showTorchButton : true,                          // iOS and Android
+    torchOn: false,                                  // Android, launch with the torch switched on (if available)
+    saveHistory: false,                              // Android, save scan history (default false)
     prompt : "Place a barcode inside the scan area", // Android
-    resultDisplayDuration: 0,     // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
-    formats : "QR_CODE",          // default: all but PDF_417 and RSS_EXPANDED
-    orientation : "portrait",     // Android only (portrait|landscape), default unset so it rotates with the device
-    disableAnimations : true,     // iOS
-    disableSuccessBeep: false     // iOS and Android
+    resultDisplayDuration: 0,                        // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+    formats : "QR_CODE",                             // default: all but PDF_417 and RSS_EXPANDED
+    orientation : "portrait",                        // Android only (portrait|landscape), default unset so it rotates with the device
+    disableAnimations : true,                        // iOS
+    disableSuccessBeep: false                        // iOS and Android
 };
 toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": false,
-    "onclick": null,
-    "showDuration": "300",
-    "hideDuration": "1000",
-    "timeOut": "5000",
-    "extendedTimeOut": "1000",
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
+    closeButton : false,
+    debug : false,
+    newestOnTop : true,
+    progressBar : false,
+    positionClass : "toast-top-center",
+    preventDuplicates : false,
+    onclick : null,
+    showDuration : 300,
+    hideDuration : 1000,
+    timeOut : 5000,
+    extendedTimeOut : 1000,
+    showEasing : "swing",
+    hideEasing : "linear",
+    showMethod : "fadeIn",
+    hideMethod : "fadeOut"
 };
 
 window.onload = function () {
@@ -298,14 +305,16 @@ window.onload = function () {
         $(document).on("click", ".js-set-paid", function (e) {
             let id = $(this).attr('data-id');
 
-            bootbox.confirm({
+            bootbox.prompt({
+                title: "Mark as Paid?",
                 size: "small",
                 centerVertical: true,
-                message: "Mark as Paid?",
-                callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
-                    if (result) {
-                        updatePaidStatus(id, 1);
-                    } else { }
+                value: '0.0',
+                callback: function (result) {
+                    if (result != null) {
+                        result = (result == ''|| result=='0.0') ? '0.0' : result;
+                        updatePaidStatus(id, 1, result);
+                    }
                 }
             });
         });
@@ -316,7 +325,7 @@ window.onload = function () {
                 size: "small",
                 centerVertical: true,
                 message: "Mark as Unpaid?",
-                callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
+                callback: function (result) {
                     if (result) {
                         updatePaidStatus(id, 0);
                     } else { }
@@ -356,7 +365,17 @@ window.onload = function () {
         });
         $(".js-view-log").click(function(e){
             $(this).focus();
-            viewLog();
+            let status = $(this).attr("data-status");
+
+            if (status == "1" || status == "open") {
+                viewLog(false);
+                $(this).html(`<i class="fa fa-chevron-down" aria-hidden="true"></i>`);
+                $(this).attr("data-status", "closed");
+            } else {
+                viewLog(true);
+                $(this).attr("data-status", "open");
+                $(this).html(`<i class="fa fa-chevron-up" aria-hidden="true"></i>`);
+            }
         });
         $(".js-delete-item").click(function(e){
             $(this).focus();
@@ -364,12 +383,12 @@ window.onload = function () {
                 size: "small",
                 centerVertical: true,
                 message: "DELETE: Are you sure?",
-                callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
+                callback: function (result) {
                     if (result) {
                         deleteItem();
                     } else { }
                 }
-            });            
+            });
         });
         
         $(document).on("click", ".js-log-clean", function (e) {
@@ -379,18 +398,13 @@ window.onload = function () {
                 size: "small",
                 centerVertical: true,
                 message: "Want to clear the log?",
-                callback: function (result) { /* result is a boolean; true = OK, false = Cancel*/
+                callback: function (result) {
                     if (result) {
                         clearLog(id);
                     } else { }
                 }
             });
         });
-        // $(document).on("change", "#repeat_interval", function(e){
-        //     let val = $(this).val();
-        //     $("#repeat_interval_value").html(val + ' days');
-
-        // });
     }
 
 };
