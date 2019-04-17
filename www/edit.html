@@ -198,21 +198,23 @@
             <tbody>
                 {{for rows}}
                 <tr>
-                    <td>{{:date}}</td>
-                    <td>{{:status}}</td>
+                    <td><small>{{:date}}</small></td>
+                    <td><small>{{:status}}</small></td>
                     <td>
+                        <small>
                         {{if value!='0.0'}}
                             $ {{:value}}
                         {{/if}}
+                        </small>
                     </td>
                 </tr>
                 {{/for}}
             </tbody>
             <tfoot>
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td>$ {{:total}}</td>
+                    <td colspan="3" class="text-right">
+                        $ {{:total}}
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="3" class="text-center">
@@ -231,6 +233,7 @@
 <script src="js/lib/toastr.min.js"></script>
 <script src="js/lib/urlify.min.js"></script>
 <script src="js/lib/jsrender.min.js"></script>
+<script src="js/lib/accounting.min.js"></script>
 <script src="js/misc.js"></script>
 <script src="js/sqlite.js"></script>
 <script src="js/app.js"></script>

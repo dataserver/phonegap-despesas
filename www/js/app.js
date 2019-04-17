@@ -301,25 +301,79 @@ window.onload = function () {
     }
     if ($("#databaseTable").length) {
         listItems();
+        let paid_value = 0;
+        
+        $(document).on("keyup", "#accounting-paid-value", function(e){
+            paid_value = $("#accounting-paid-value").val();
+            let value = accounting.formatMoney(paid_value);
+            var field = document.getElementById('accounting-paid-value');
+
+            $("#formatted-value").html(value);
+            if (field.validity.valid === false) {
+                field.classList.add('is-invalid');
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
 
         $(document).on("click", ".js-set-paid", function (e) {
             let id = $(this).attr('data-id');
+            let message = `
+                <div>
+                <form id="form-accounting-paid">
+                <label for="accounting-paid-value">Ammount paid or leave it blank</label>
+                <input type="text" id="accounting-paid-value" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?">
+                <small><span id="formatted-value"></span></small>
+                <div class="invalid-feedback">
+                    Invalid Formatting
+                </div>
+                </form>
+                </div>
+            `;
 
-            bootbox.prompt({
-                title: "Mark as Paid?",
-                size: "small",
-                centerVertical: true,
-                value: '',
-                pattern  : "[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?",
-                decimal : "true",
-                placeholder: '0.00',
-                callback: function (result) {
-                    if (result !== null) {
-                        result = (result == ''|| result=='0.0') ? '0.0' : result;
-                        updatePaidStatus(id, 1, result);
+            var dialog = bootbox.dialog({
+                title: 'Mark as Paid?',
+                message: message,
+                size: 'large',
+                buttons: {
+                    cancel: {
+                        label: "Close",
+                        className: 'btn-secondary',
+                        callback: function(){
+                            console.log('Custom cancel clicked');
+                        }
+                    },
+                    noclose: {
+                        label: "OK",
+                        className: 'btn-primary',
+                        callback: function(){
+                            var field = document.getElementById('accounting-paid-value');
+                            if (field.validity.valid === false) {
+                                return false;
+                            } else {
+                                updatePaidStatus(id, 1, paid_value);
+                            }
+                        }
                     }
                 }
             });
+            // bootbox.prompt({
+            //     title: "Mark as Paid?",
+            //     size: "small",
+            //     centerVertical: true,
+            //     value: '',
+            //     pattern  : "[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?",
+            //     decimal : "true",
+            //     placeholder: '0.00',
+            //     callback: function (result) {
+            //         if (result !== null) {
+            //             result = (result == ''|| result=='0.0') ? '0.0' : result;
+            //             updatePaidStatus(id, 1, result);
+            //         }
+            //     }
+            // });
         });
         $(document).on("click", ".js-set-unpaid", function (e) {
             let id = $(this).attr('data-id');
