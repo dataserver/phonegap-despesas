@@ -310,7 +310,7 @@ window.onload = function () {
                 size: "small",
                 centerVertical: true,
                 value: '',
-                pattern  : "[0-9]*",
+                pattern  : "[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?",
                 decimal : "true",
                 placeholder: '0.00',
                 callback: function (result) {
