@@ -309,9 +309,10 @@ window.onload = function () {
                 title: "Mark as Paid?",
                 size: "small",
                 centerVertical: true,
-                value: '0.0',
+                value: '',
+                placeholder: '0.00',
                 callback: function (result) {
-                    if (result != null) {
+                    if (result !== null) {
                         result = (result == ''|| result=='0.0') ? '0.0' : result;
                         updatePaidStatus(id, 1, result);
                     }
