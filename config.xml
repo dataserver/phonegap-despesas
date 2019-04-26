@@ -3,7 +3,7 @@
     xmlns="http://www.w3.org/ns/widgets" 
     xmlns:gap="http://phonegap.com/ns/1.0"
     id="com.github.dataserver.despesas" 
-    version="11" 
+    version="22" 
 >
     <name>Monthly bills checker</name>
     <description>
