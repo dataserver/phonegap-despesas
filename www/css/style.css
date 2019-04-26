@@ -28,6 +28,9 @@ legend {
 .fa.fa-xs{
     font-size: .75em;
 }
+.fa.fa-sm{
+    font-size: .875em;
+}
 .btn-group-xs > .btn, .btn-xs {
   padding: .25rem .4rem;
   font-size: .875rem;
