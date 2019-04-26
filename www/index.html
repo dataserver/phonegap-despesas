@@ -35,32 +35,36 @@
 
 
 <script id="theTmpl" type="text/x-jsrender">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Paid</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {{for rows}}
-            <tr>
-                <td>{{:title}}</td>
-                <td>{{:day}} {{:month}}</td>
-                {{if paid_this_month==1}}
-                    <td><span class="js-set-unpaid btn btn-outline-secondary btn-sm" data-id="{{:id}}"><i class="fa fa-check"></i></span></td>
-                {{else}}
-                    <td><span class="js-set-paid btn btn-outline-secondary btn-sm" data-id="{{:id}}"><i class="fa fa-close"></i></span></td>
-                {{/if}}
-                <td>  
-                    <a href="edit.html?id={{:id}}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
-                </td>
-            </tr>
-            {{/for}}
-        </tbody>
-    </table>
+    <div class="table-responsive-sm">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>title</th>
+                    <th>date</th>
+                    <th>last</th>
+                    <th>current</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{for rows}}
+                <tr>
+                    <td>{{:title}}</td>
+                    <td>{{:day}} {{:month}}</td>
+                    <td>{{:lastpaidmonth}}</td>
+                    {{if paid_this_month==1}}
+                        <td><span class="js-set-unpaid btn btn-outline-secondary btn-xs" data-id="{{:id}}"><i class="fa fa-check fa-xs"></i></span></td>
+                    {{else}}
+                        <td><span class="js-set-paid btn btn-outline-secondary btn-xs" data-id="{{:id}}"><i class="fa fa-close fa-xs"></i></span></td>
+                    {{/if}}
+                    <td>
+                        <a href="edit.html?id={{:id}}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+                    </td>
+                </tr>
+                {{/for}}
+            </tbody>
+        </table>
+    </div>
 </script>
 
 <script src="cordova.js"></script>
