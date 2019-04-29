@@ -1,29 +1,52 @@
-function listItems() {
+function listItems(SelectedMonth = null) {
 
     $('#databaseTable').html('');
     db.readTransaction(function (tx) {
+/*
+LAST cycle paid
+            SELECT b.*,bl.cycle,bl.status,bl.created_on FROM bills AS b
+            LEFT JOIN (
+            SELECT *, MAX(cycle) from bills_log 
+            GROUP BY bill_id
+            ) as bl
+            ON
+            b.id = bl.bill_id
+  */
+        let month = moment().format("YYYYMM");
+        if (SelectedMonth) {
+            month = SelectedMonth;
+        }
         tx.executeSql(`
-            SELECT b.*,bl.cycle,bl.status,bl.created_on from bills AS b
-            LEFT JOIN bills_log AS bl
-            ON b.id = bl.bill_id
-            GROUP BY b.id
-            ORDER BY b.day ASC, bl.cycle DESC
-            `, [],
+            SELECT b.*,bl.cycle,bl.status,bl.created_on FROM bills AS b
+            LEFT JOIN (
+            SELECT * FROM bills_log 
+            WHERE cycle=?
+            GROUP BY bill_id
+            ) as bl
+            ON
+            b.id = bl.bill_id
+            `, [month],
             function (tx, result) {
                 if (result != null && result.rows != null) {
                     let rows = [];
                     let yyyymm =  moment().format("YYYYMM");
-
+                    if (SelectedMonth) {
+                        yyyymm = SelectedMonth;
+                    }
                     for (let i = 0, len = result.rows.length; i < len; i++) {
                         rows[i] = result.rows.item(i);
                         rows[i].day = pad(rows[i].day);
                         rows[i].paid_this_month = (rows[i].cycle == yyyymm) ? 1 : 0;
                     }
+                    $.views.helpers({
+                        set_paid_cycle: month
+                    });
                     let template = $.templates("#theTmpl");
                     let htmlOutput = template.render({
+                        set_paid_cycle: month,
                         rows: rows
                     });
-                    $('#databaseTable').append(htmlOutput);
+                    $('#databaseTable').html(htmlOutput);
                 }
             }, dbErrorHandler);
     }, dbErrorHandler, dbNullHandler);
@@ -294,6 +317,7 @@ window.onload = function () {
         });
     }
     if ($("#databaseTable").length) {
+        $(".js-list-month").attr("data-month", moment().add(1, 'months').format("YYYYMM"));
         listItems();
         let paid_value = 0;
         
@@ -314,7 +338,7 @@ window.onload = function () {
 
         $(document).on("click", ".js-set-paid", function (e) {
             let id = $(this).attr('data-id');
-            let billing_cycle = moment().format("YYYYMM");
+            let billing_cycle = $(this).attr('data-cycle');
             let message = `
                 <div>
                 <form id="form-accounting-paid">
@@ -372,6 +396,18 @@ window.onload = function () {
         //         }
         //     });
         // });
+        $(".js-list-month").click(function(e){
+            let month = $(this).attr("data-month");
+            let curr_month = moment().format("YYYYMM")
+            let next_month = moment().add(1, 'months').format("YYYYMM");
+
+            listItems(month);
+            if (month != curr_month) {
+                $(this).attr("data-month", curr_month).html("Current");
+            } else {
+                $(this).attr("data-month", next_month).html("Next Month");
+            }
+        });
     }
     if ($("#form_edit").length) {
         showForm();
