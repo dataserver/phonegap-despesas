@@ -28,8 +28,6 @@ function db_init() {
                 title TEXT NOT NULL,
                 normalized TEXT NOT NULL,
                 day INTEGER,
-                paid INTEGER DEFAULT 0,
-                lastpaidmonth TEXT,
                 description TEXT
             )
         `, [], dbNullHandler, dbErrorHandler);
@@ -37,9 +35,10 @@ function db_init() {
             CREATE TABLE IF NOT EXISTS bills_log (
                 id INTEGER PRIMARY KEY,
                 bill_id INTEGER NOT NULL,
-                date TEXT NOT NULL,
+                cycle TEXT NOT NULL,
                 value TEXT, 
-                status TEXT NO NULL
+                status TEXT NO NULL,
+                created_on TEXT NOT NULL
             )
         `, [], dbNullHandler, dbErrorHandler);
         // tx.executeSql(`

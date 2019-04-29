@@ -2,16 +2,22 @@ function listItems() {
 
     $('#databaseTable').html('');
     db.readTransaction(function (tx) {
-        tx.executeSql('SELECT * FROM bills ORDER BY day', [],
+        tx.executeSql(`
+            SELECT b.*,bl.cycle,bl.status,bl.created_on from bills AS b
+            LEFT JOIN bills_log AS bl
+            ON b.id = bl.bill_id
+            GROUP BY b.id
+            ORDER BY b.day ASC, bl.cycle DESC
+            `, [],
             function (tx, result) {
                 if (result != null && result.rows != null) {
                     let rows = [];
-                    let yyyymm = todayDate.yyyy + "" + todayDate.mm;
+                    let yyyymm =  moment().format("YYYYMM");
 
                     for (let i = 0, len = result.rows.length; i < len; i++) {
                         rows[i] = result.rows.item(i);
                         rows[i].day = pad(rows[i].day);
-                        rows[i].paid_this_month = (rows[i].lastpaidmonth == yyyymm) ? 1 : 0;
+                        rows[i].paid_this_month = (rows[i].cycle == yyyymm) ? 1 : 0;
                     }
                     let template = $.templates("#theTmpl");
                     let htmlOutput = template.render({
@@ -34,7 +40,7 @@ function viewLog(show = true) {
                     if (result != null && result.rows != null) {
                         let rows = [];
                         let total = 0;
-                        let yyyymm = todayDate.yyyy +''+ todayDate.mm;
+                        let yyyymm = moment().format("YYYYMM");
 
                         for (let i = 0, len = result.rows.length; i < len; i++) {
                             rows[i] = result.rows.item(i);
@@ -91,9 +97,6 @@ function addItem() {
     let normalized = URLify.normalizeName(title);
         normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
-    let paid = $('#form_edit [name="paid"]').prop('checked');
-        paid = (paid) ? 1 : 0;
-    let lastpaidmonth = (paid == 1) ? todayDate.yyyy +''+ todayDate.mm : null;
     let description = $('#form_edit [name="description"]').val();
 
     let form = document.getElementById('form_edit');
@@ -107,11 +110,11 @@ function addItem() {
         db.transaction(function (tx) {
             tx.executeSql(`
                 INSERT INTO bills
-                    (title, normalized, day, paid, lastpaidmonth, description) 
+                    (title, normalized, day, description) 
                     VALUES 
-                    (?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?)
                 `,
-                [title, normalized, day, paid, lastpaidmonth, description],
+                [title, normalized, day, description],
                 dbNullHandler, dbErrorHandler
             );
         });
@@ -134,6 +137,20 @@ function deleteItem() {
     });
     window.history.back();
 }
+function deletePaymentItem(deleteById = null) {
+    if (deleteById) {
+        db.transaction(function (tx) {
+            tx.executeSql(`
+                DELETE FROM bills_log where id=?
+                `,
+                [deleteById],
+                dbNullHandler,
+                dbErrorHandler
+            );
+        });
+    }
+    window.history.back();
+}
 
 function updateItem() {
     let selectedId = getParameterByName("id");
@@ -142,10 +159,6 @@ function updateItem() {
     let normalized = URLify.normalizeName(title);
         normalized = normalized.toUpperCase();
     let day = $('#form_edit [name="day"]').val();
-    let paid = $('#form_edit [name="paid"]').prop('checked');
-        paid = (paid) ? 1 : 0;
-    let lastpaidmonth = $('#form_edit [name="lastpaidmonth"]').val();
-        lastpaidmonth = (paid == 1) ? null : lastpaidmonth;
     let description = $('#form_edit [name="description"]').val();
 
     let form = document.getElementById('form_edit');
@@ -157,9 +170,9 @@ function updateItem() {
         
         db.transaction(function (tx) {
             tx.executeSql(`
-                UPDATE bills SET title=?, normalized=?, day=?, paid=?, lastpaidmonth=?, description=? WHERE id=?
+                UPDATE bills SET title=?, normalized=?, day=?, description=? WHERE id=?
                 `,
-                [title, normalized, day, paid, lastpaidmonth, description, selectedId],
+                [title, normalized, day, description, selectedId],
                 dbNullHandler,
                 dbErrorHandler
             );
@@ -201,29 +214,23 @@ function showForm() {
     }
 }
 
-function updatePaidStatus(id, paid = 1, value = '') {
-    let lastpaidmonth = (paid == 1) ? todayDate.yyyy +''+ todayDate.mm : null;
-    let datetime = todayDate.yyyy + "-" + todayDate.mm + "-" + todayDate.mm +" "+ todayTime.hh + ":" + todayTime.mm + ":" + todayTime.ss;
-    let paid_txt = (paid == 1) ? "changed to paid" : "changed to unpaid";
-        value = (value == '') ? '0' : value;
-        value = parseFloat(value.replace(',','.').replace(' ',''));
-        value = Number(value);
-
+function updatePaidStatus(id, paid = 1, ammount_paid = '', billing_cycle = null) {
+    let created_on = moment().format("YYYY-MM-DD HH:mm:ss"); 
+    let status = (paid == 1) ? "paid" : "unpaid";
+        ammount_paid = (ammount_paid == '') ? '0' : ammount_paid;
+        ammount_paid = parseFloat(ammount_paid.replace(',','.').replace(' ',''));
+        ammount_paid = Number(ammount_paid);
+    if (!billing_cycle) {
+        billing_cycle = moment().format("YYYYMM");
+    }
     db.transaction(function (tx) {
         tx.executeSql(`
-                UPDATE bills SET paid=?, lastpaidmonth=? WHERE id=?
-            `,
-            [paid, lastpaidmonth, id],
-            dbNullHandler,
-            dbErrorHandler
-        );
-        tx.executeSql(`
             INSERT INTO bills_log
-                (bill_id, date, value, status) 
+                (bill_id, cycle, value, status, created_on) 
                 VALUES 
-                (?, ?, ?,?)
+                (?, ?, ?, ?, ?)
             `,
-            [id, datetime, value, paid_txt],
+            [id, billing_cycle, ammount_paid, status, created_on],
             dbNullHandler, dbErrorHandler
         );
     });
@@ -243,19 +250,6 @@ function clearLog(id) {
     $("#logview").html('');
 }
 
-
-
-var today = new Date();
-var todayDate = {
-    dd : String(today.getDate()).padStart(2, '0'),
-    mm : String(today.getMonth() + 1).padStart(2, '0'),
-    yyyy : String(today.getFullYear())
-};
-var todayTime = {
-    hh : String(today.getHours()).padStart(2, '0'),
-    mm : String(today.getMinutes() + 1).padStart(2, '0'),
-    ss : String(today.getSeconds()).padStart(2, '0')
-};
 var barcodeScannerOptions = {
     preferFrontCamera : false,                       // iOS and Android
     showFlipCameraButton : false,                    // iOS and Android
@@ -320,15 +314,17 @@ window.onload = function () {
 
         $(document).on("click", ".js-set-paid", function (e) {
             let id = $(this).attr('data-id');
+            let billing_cycle = moment().format("YYYYMM");
             let message = `
                 <div>
                 <form id="form-accounting-paid">
-                <label for="accounting-paid-value">Ammount paid or leave it blank</label>
-                <input type="text" id="accounting-paid-value" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?">
+                <label for="ammount_paid">Ammount paid or leave it blank</label>
+                <input type="text" id="ammount_paid" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?">
                 <small><span id="formatted-value"></span></small>
-                <div class="invalid-feedback">
-                    Invalid Formatting
-                </div>
+                <div class="invalid-feedback">Invalid Formatting</div>
+                <label for="billing_cycle">Billing cycle</label>
+                <input type="text" id="billing_cycle" name="billing_cycle" class="form-control" value="${billing_cycle}" required>
+                <small class="form-text text-muted">YYYYMM</small>
                 </form>
                 </div>
             `;
@@ -349,46 +345,33 @@ window.onload = function () {
                         label: "OK",
                         className: 'btn-primary',
                         callback: function(){
-                            var field = document.getElementById('accounting-paid-value');
-                            if (field.validity.valid === false) {
+                            var ammount_paid = document.getElementById('ammount_paid');
+                            var billing_cycle = document.getElementById('billing_cycle');
+
+                            if (ammount_paid.validity.valid === false || billing_cycle.validity.valid === false) {
                                 return false;
                             } else {
-                                updatePaidStatus(id, 1, paid_value);
+                                updatePaidStatus(id, 1, ammount_paid.value, billing_cycle.value);
                             }
                         }
                     }
                 }
             });
-            // bootbox.prompt({
-            //     title: "Mark as Paid?",
-            //     size: "small",
-            //     centerVertical: true,
-            //     value: '',
-            //     pattern  : "[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?",
-            //     decimal : "true",
-            //     placeholder: '0.00',
-            //     callback: function (result) {
-            //         if (result !== null) {
-            //             result = (result == ''|| result=='0.0') ? '0.0' : result;
-            //             updatePaidStatus(id, 1, result);
-            //         }
-            //     }
-            // });
         });
-        $(document).on("click", ".js-set-unpaid", function (e) {
-            let id = $(this).attr('data-id');
+        // $(document).on("click", ".js-set-unpaid", function (e) {
+        //     let id = $(this).attr('data-id');
 
-            bootbox.confirm({
-                size: "small",
-                centerVertical: true,
-                message: "Mark as Unpaid?",
-                callback: function (result) {
-                    if (result) {
-                        updatePaidStatus(id, 0);
-                    } else { }
-                }
-            });
-        });
+        //     bootbox.confirm({
+        //         size: "small",
+        //         centerVertical: true,
+        //         message: "Mark as Unpaid?",
+        //         callback: function (result) {
+        //             if (result) {
+        //                 updatePaidStatus(id, 0);
+        //             } else { }
+        //         }
+        //     });
+        // });
     }
     if ($("#form_edit").length) {
         showForm();
@@ -446,6 +429,21 @@ window.onload = function () {
                     } else { }
                 }
             });
+        });
+        $(document).on("click", ".js-delete-payment", function(e){
+            let id = $(this).attr("data-id");
+            $(this).focus();
+            bootbox.confirm({
+                size: "small",
+                centerVertical: true,
+                message: "DELETE: Are you sure?",
+                callback: function (result) {
+                    if (result) {
+                        deletePaymentItem(id);
+                    } else { }
+                }
+            });
+
         });
         
         $(document).on("click", ".js-log-clean", function (e) {
