@@ -514,7 +514,16 @@ window.onload = function () {
         });
     }
     $("#showDeviceInfo").click(function(){
-        alert(physicalScreenWidth +" / "+  physicalScreenHeight );
+        let message = `
+            physicalScreenWidth: ${physicalScreenWidth}
+            <br>
+            physicalScreenHeight: ${physicalScreenHeight}
+            <br>
+            devicePixelRatio : ${window.devicePixelRatio}
+            <br>
+        `;
+        bootbox.alert(message);
+        
     });
 
 };
