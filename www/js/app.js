@@ -289,6 +289,9 @@ var barcodeScannerOptions = {
     disableAnimations : true,                        // iOS
     disableSuccessBeep: false                        // iOS and Android
 };
+var physicalScreenWidth = window.screen.width * window.devicePixelRatio;
+var physicalScreenHeight = window.screen.height * window.devicePixelRatio;
+
 toastr.options = {
     closeButton : false,
     debug : false,
@@ -510,5 +513,8 @@ window.onload = function () {
             });
         });
     }
+    $("#showDeviceInfo").click(function(){
+        alert(physicalScreenWidth +" / "+  physicalScreenHeight );
+    });
 
 };
