@@ -28,7 +28,11 @@
     </div>
     <div style="display: flex; justify-content: space-between">
         <button class="btn btn-primary" onclick="window.location.href='edit.html?id=0'">Add</button>
-        <button class="js-list-month btn btn-secondary" data-month="+1">Next Month</button>
+        <div>
+        <button class="js-list-month btn btn-secondary" data-operation="-1" data-current=""><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+        <button class="js-list-month btn btn-secondary" data-operation="0" data-current=""><i class="fa fa-stop" aria-hidden="true"></i></button>        
+        <button class="js-list-month btn btn-secondary" data-operation="+1" data-current=""><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+        </div>
     </div>
     <div id="databaseTable" class="mt-4">
     </div>
@@ -52,7 +56,7 @@
                 <tr>
                     <td>{{:title}}</td>
                     <td>{{:day}} {{:month}}</td>
-                    <td>{{:cycle}}</td>
+                    <td>{{:cycle_str}}</td>
                     {{if paid_this_month==1}}
                         <td><i class="fa fa-check fa-xs" data-cycle="{{:~set_paid_cycle}}"></i></td>
                     {{else}}

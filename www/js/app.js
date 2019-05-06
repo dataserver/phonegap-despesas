@@ -14,8 +14,10 @@ LAST cycle paid
   */
         let month = moment().format("YYYYMM");
         if (SelectedMonth) {
+            SelectedMonth = SelectedMonth.substring(0, 6);
             month = SelectedMonth;
         }
+        //console.log(month);
         tx.executeSql(`
             SELECT b.*,bl.cycle,bl.status,bl.created_on FROM bills AS b
             LEFT JOIN (
@@ -37,6 +39,7 @@ LAST cycle paid
                         rows[i] = result.rows.item(i);
                         rows[i].day = pad(rows[i].day);
                         rows[i].paid_this_month = (rows[i].cycle == yyyymm) ? 1 : 0;
+                        rows[i].cycle_str = moment(month+"01").format("MMM YYYY");
                     }
                     $.views.helpers({
                         set_paid_cycle: month
@@ -317,7 +320,7 @@ window.onload = function () {
         });
     }
     if ($("#databaseTable").length) {
-        $(".js-list-month").attr("data-month", moment().add(1, 'months').format("YYYYMM"));
+        $(".js-list-month").attr("data-current", moment().format("YYYYMMDD"));
         listItems();
         let paid_value = 0;
         
@@ -339,16 +342,16 @@ window.onload = function () {
         $(document).on("click", ".js-set-paid", function (e) {
             let id = $(this).attr('data-id');
             let billing_cycle = $(this).attr('data-cycle');
+            let month_str = moment(billing_cycle + "01").format("MMM YYYY");
             let message = `
                 <div>
                 <form id="form-accounting-paid">
+                <h6>Cycle: ${month_str}</h6>
+                <input type="hidden" id="billing_cycle" name="billing_cycle" class="form-control" value="${billing_cycle}" required>
                 <label for="ammount_paid">Ammount paid or leave it blank</label>
                 <input type="text" id="ammount_paid" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?">
                 <small><span id="formatted-value"></span></small>
                 <div class="invalid-feedback">Invalid Formatting</div>
-                <label for="billing_cycle">Billing cycle</label>
-                <input type="text" id="billing_cycle" name="billing_cycle" class="form-control" value="${billing_cycle}" required>
-                <small class="form-text text-muted">YYYYMM</small>
                 </form>
                 </div>
             `;
@@ -397,16 +400,26 @@ window.onload = function () {
         //     });
         // });
         $(".js-list-month").click(function(e){
-            let month = $(this).attr("data-month");
-            let curr_month = moment().format("YYYYMM")
-            let next_month = moment().add(1, 'months').format("YYYYMM");
+            let operation = $(this).attr("data-operation");
+            let curr_month = $(this).attr("data-current");
+            let show_month;
 
-            listItems(month);
-            if (month != curr_month) {
-                $(this).attr("data-month", curr_month).html("Current");
-            } else {
-                $(this).attr("data-month", next_month).html("Next Month");
+            curr_month = (curr_month=="") ? moment().format("YYYYMMDD") : curr_month;
+            switch(operation) {
+                case "+1":
+                    show_month = moment(curr_month).add(1, 'months').format("YYYYMMDD");
+                    break;
+                case "-1":
+                    show_month = moment(curr_month).subtract(1, 'months').format("YYYYMMDD");
+                    break;
+                case "0":
+                default:
+                    show_month = moment().format("YYYYMMDD");
+                    break;
             }
+            listItems(show_month);
+
+            $(".js-list-month").attr("data-current", show_month);
         });
     }
     if ($("#form_edit").length) {
