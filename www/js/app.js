@@ -61,7 +61,7 @@ function viewLog(show = true) {
     $('#logview').html('');
     if (show) {
         db.readTransaction(function (tx) {
-            tx.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ', [id],
+            tx.executeSql(' SELECT * FROM bills_log WHERE bill_id=? ORDER BY created_on DESC', [id],
                 function (transaction, result) {
                     if (result != null && result.rows != null) {
                         let rows = [];
