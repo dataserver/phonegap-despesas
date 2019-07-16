@@ -351,8 +351,9 @@ window.onload = function () {
                 <form id="form-accounting-paid">
                 <h6>Cycle: ${month_str}</h6>
                 <input type="hidden" id="billing_cycle" name="billing_cycle" class="form-control" value="${billing_cycle}" required>
-                <label for="ammount_paid">Ammount paid or leave it blank</label>
+                <label for="ammount_paid">Ammount paid or leave it blank <span class="js-scan-barcode" data-target="#ammount_paid2"><i class="fa fa-barcode"></span></label>
                 <input type="text" id="ammount_paid" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?">
+                <input type="text" id="ammount_paid2" class="form-control">
                 <small><span id="formatted-value"></span></small>
                 <div class="invalid-feedback">Invalid Formatting</div>
                 </form>
@@ -511,6 +512,20 @@ window.onload = function () {
                     } else { }
                 }
             });
+        });
+         $(document).on("click", ".js-scan-barcode", function (e) {
+            let target_el = $(this).attr("data-target");
+
+            cordova.plugins.barcodeScanner.scan(
+                function (result) {
+                    $(target_el).val( result.text );
+                    // alert("We got a barcode\n" + "Result: " + result.text + "\n" + "Format: " + result.format + "\n" + "Cancelled: " + result.cancelled);
+                },
+                function (error) {
+                    alert("Scanning failed: " + error);
+                },
+                barcodeScannerOptions
+            );
         });
     }
     $("#showDeviceInfo").click(function(){
