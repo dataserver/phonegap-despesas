@@ -284,8 +284,8 @@ var barcodeScannerOptions = {
     saveHistory: false,                              // Android, save scan history (default false)
     prompt : "Place a barcode inside the scan area", // Android
     resultDisplayDuration: 0,                        // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
-    formats : "QR_CODE",                             // default: all but PDF_417 and RSS_EXPANDED
-    orientation : "portrait",                        // Android only (portrait|landscape), default unset so it rotates with the device
+    //formats : "QR_CODE",                             // default: all but PDF_417 and RSS_EXPANDED
+    //orientation : "portrait",                        // Android only (portrait|landscape), default unset so it rotates with the device
     disableAnimations : true,                        // iOS
     disableSuccessBeep: false                        // iOS and Android
 };
@@ -352,11 +352,11 @@ window.onload = function () {
                 <h6>Cycle: ${month_str}</h6>
                 <input type="hidden" id="billing_cycle" name="billing_cycle" class="form-control" value="${billing_cycle}" required>
                 <label for="ammount_paid">Ammount paid or leave it blank</label>
-                <input type="text" id="ammount_paid" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?"> <span class="js-scan-barcode" data-target="#ammount_paid2"><i class="fa fa-barcode"></span>  
-                <br>
-                <input type="text" id="ammount_paid2" class="form-control">
+                <input type="text" id="ammount_paid" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?|,[0-9][0-9]?)?">
+                
                 <small><span id="formatted-value"></span></small>
                 <div class="invalid-feedback">Invalid Formatting</div>
+                <button type="button" class="js-scan-boleto" data-target="#ammount_paid"><i class="fa fa-barcode"></i></button>
                 </form>
                 </div>
             `;
@@ -427,8 +427,11 @@ window.onload = function () {
             $(".js-list-month").attr("data-current", show_month);
         });
     }
+
+
     if ($("#form_edit").length) {
         showForm();
+
 
         $(".js-scan-qrcode").click(function(e){
             let target_el = $(this).attr("data-target");
@@ -514,21 +517,23 @@ window.onload = function () {
                 }
             });
         });
-         $(document).on("click", ".js-scan-barcode", function (e) {
-            let target_el = $(this).attr("data-target");
-
-            cordova.plugins.barcodeScanner.scan(
-                function (result) {
-                    $(target_el).val( result.text );
-                    // alert("We got a barcode\n" + "Result: " + result.text + "\n" + "Format: " + result.format + "\n" + "Cancelled: " + result.cancelled);
-                },
-                function (error) {
-                    alert("Scanning failed: " + error);
-                },
-                barcodeScannerOptions
-            );
-        });
     }
+    //$(".js-scan-boleto").click(function(e){
+    $(document).on("click", ".js-scan-boleto", function(e){
+        let target_el = $(this).attr("data-target");
+
+        cordova.plugins.barcodeScanner.scan(
+            function (result) {
+
+                Boleto.setBarcode(result.text);
+                $(target_el).val(Boleto.amount());
+            },
+            function (error) {
+                alert("Scanning failed: " + error);
+            },
+            barcodeScannerOptions
+        );
+    });
     $("#showDeviceInfo").click(function(){
         let message = `
             physicalScreenWidth: ${physicalScreenWidth}
