@@ -1,5 +1,7 @@
- /**
+/**
  * https://jsfiddle.net/3bcz5jav/5/
+ * required:
+ * - moment.js  https://momentjs.com/
  */
 var Boleto = {
     barcodeNumber: '',
@@ -137,14 +139,14 @@ var Boleto = {
             code = code + '00000000000'.substr(0, 47 - code.length);
         }
         if (code.length != 47) {
-            this.errors.push('A linha do código de barras está incompleta!' + code.length);
+            this.errors.push('Barcode number is imcomplete: ' + code.length + " chars found, requires 47");
             return false;
         }
 
         code = code.substr(0, 4) + code.substr(32, 15) + code.substr(4, 5) + code.substr(10, 10) + code.substr(21, 10);
 
         if (this.modulo11(code.substr(0, 4) + code.substr(5, 39)) != code.substr(4, 1)) {
-            throw new Error('Digito verificador ' + code.substr(4, 1) + ', o correto é ' + this.modulo11(code.substr(0, 4) + code.substr(5, 39)) + '\nO sistema não altera automaticamente o dígito correto na quinta casa!');
+            throw new Error('Verification digit is:' + code.substr(4, 1) + ', require ' + this.modulo11(code.substr(0, 4) + code.substr(5, 39)) + '');
         }
 
         this.barcodeNumber = code;
@@ -154,10 +156,10 @@ var Boleto = {
         let number = barcodeNumber.replace(/[^0-9]/g, '');
 
         if (number.length != 44) {
-            throw new Error('A linha do código de barras está incompleta!');
+            throw new Error('Bank slip number is incomplete');
         }
         if (!this.barcodeIsValid(number)) {
-            throw new Error('A linha do código de barras está incorreto!');
+            throw new Error('Bank slip  number is invalid');
         }
 
         let campo1 = number.substr(0, 4) + number.substr(19, 1) + number.substr(20, 4);
@@ -354,12 +356,11 @@ var Boleto = {
 
 }
 // #######################################################################
+// Example
 // var a = "34195844100000020005000001233203186422147000";
 // var b = "34195.00008 01233.203189 64221.470004 5 84410000002000";
-
-// //Boleto.setBarcode(a);
+// Boleto.setBarcode(a);
 // Boleto.setSlipNumber(b);
-
 // $("#number").html(Boleto.number());
 // $("#prettyNumber").html(Boleto.prettyNumber());
 // $("#barcode").html(Boleto.barcode());
@@ -368,7 +369,6 @@ var Boleto = {
 // $("#bank").html(Boleto.bank());
 // $("#currency").html( JSON.stringify(Boleto.currency()) );
 // $("#expirationDate").html(Boleto.expirationDate('d/m/Y H:i:s'));
-
 // if (Boleto.barcodeIsValid(a)) {
 //     console.log('valid');
 // } else {
